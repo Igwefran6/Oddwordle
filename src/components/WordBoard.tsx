@@ -3,19 +3,19 @@ import { isArrayFilled } from "../utils/isArrayFilled";
 
 interface WordBoardProps {
   array: string[];
-  wordCount: number;
   userSetWord: string[];
+  clickedIndices: number[];
+  setClickedIndices: Dispatch<SetStateAction<number[]>>;
   setUserSetWord: Dispatch<SetStateAction<string[]>>;
 }
 
 function WordBoard({
   array,
-  wordCount,
   userSetWord,
+  clickedIndices,
+  setClickedIndices,
   setUserSetWord,
 }: WordBoardProps) {
-  const [clickedIndices, setClickedIndices] = useState<number[]>([]);
-
   const handleClick = (element: string, index: number) => {
     if (isArrayFilled(userSetWord)) {
       return;

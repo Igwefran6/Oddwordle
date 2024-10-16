@@ -14,7 +14,9 @@ function HomePage() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [wordCount, setWordCount] = useState(4);
   const [userSetWord, setUserSetWord] = useState<string[]>([]);
+  const [initialUserSetWord, setInitialUserSetWord] = useState<string[]>([]); // To track the initial hints
   const [hintCount, setHintCount] = useState(2);
+  const [clickedIndices, setClickedIndices] = useState<number[]>([]);
 
   // Helper function to get random unique indices
   const getRandomIndices = (count: number, max: number) => {
@@ -60,7 +62,21 @@ function HomePage() {
     });
 
     setUserSetWord(newUserSetWord);
+    setInitialUserSetWord(newUserSetWord); // Track the initial state of hints
   }, [word, hintCount, wordCount]);
+
+  function handleCheck() {
+    if (word === userSetWord.join("")) {
+      alert("right");
+    } else {
+      alert("wrong");
+    }
+  }
+  function handleClear() {
+    // Reset userSetWord to the initial hints, keeping the initial hints intact
+    setUserSetWord([...initialUserSetWord]);
+    setClickedIndices([]);
+  }
 
   return (
     <>
@@ -69,13 +85,14 @@ function HomePage() {
           <AnswerBox array={userSetWord} />
           <WordBoard
             array={array}
-            wordCount={wordCount}
             userSetWord={userSetWord}
             setUserSetWord={setUserSetWord}
+            clickedIndices={clickedIndices}
+            setClickedIndices={setClickedIndices}
           />
           <div className="flex gap-4">
-            <Button onClick={() => {}} label="Check" />
-            <Button onClick={() => {}} label="Delete" />
+            <Button onClick={handleCheck} label="Check" />
+            <Button onClick={handleClear} label="Clear" />
           </div>
         </div>
         <SettingsButton onClick={() => setSettingsVisible((prev) => !prev)} />
