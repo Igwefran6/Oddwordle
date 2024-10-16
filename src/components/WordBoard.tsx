@@ -1,4 +1,4 @@
-import { Key, SetStateAction, useState, Dispatch } from "react";
+import { Key, SetStateAction, Dispatch } from "react";
 import { isArrayFilled } from "../utils/isArrayFilled";
 
 interface WordBoardProps {
@@ -48,7 +48,7 @@ function WordBoard({
             className={`${
               element
                 ? clickedIndices.includes(index as number)
-                  ? "bg-slate-800 border border-red-500 cursor-not-allowed"
+                  ? "bg-slate-800 border border-red-500 cursor-not-allowed "
                   : "bg-slate-800 border border-slate-400 hover:scale-105 cursor-pointer active:scale-95"
                 : "bg-slate-900 opacity-50 cursor-not-allowed"
             } h-12 w-12 flex items-center justify-center font-black capitalize text-2xl text-white transition-all `}

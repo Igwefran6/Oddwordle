@@ -7,12 +7,16 @@ import SettingsButton from "../components/SettingsButton";
 import HUD from "../components/HUD";
 import Settings from "../components/Settings";
 import shuffleAndScramble from "../utils/shuffleAndScramble";
+import AlertBox from "../components/AlertBox";
+import { isArrayFilled } from "../utils/isArrayFilled";
 
 function HomePage() {
   const [word, setWord] = useState("");
   const [array, setArray] = useState<string[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [alertboxVisible, setAlertboxVisible] = useState(false);
   const [wordCount, setWordCount] = useState(4);
+  const [attempts, setAttempts] = useState(0);
   const [userSetWord, setUserSetWord] = useState<string[]>([]);
   const [initialUserSetWord, setInitialUserSetWord] = useState<string[]>([]); // To track the initial hints
   const [hintCount, setHintCount] = useState(2);
@@ -41,7 +45,7 @@ function HomePage() {
     }
     setUserSetWord(Array(wordCount).fill("")); // Initialize with empty strings
     getWord();
-  }, [wordCount]);
+  }, [wordCount, attempts]);
 
   useEffect(() => {
     if (!word) {
@@ -63,13 +67,13 @@ function HomePage() {
 
     setUserSetWord(newUserSetWord);
     setInitialUserSetWord(newUserSetWord); // Track the initial state of hints
-  }, [word, hintCount, wordCount]);
+  }, [word, hintCount, wordCount, attempts]);
 
   function handleCheck() {
-    if (word === userSetWord.join("")) {
-      alert("right");
+    if (isArrayFilled(userSetWord)) {
+      setAlertboxVisible(true);
     } else {
-      alert("wrong");
+      alert("Please complete the answer box!");
     }
   }
   function handleClear() {
@@ -77,6 +81,11 @@ function HomePage() {
     setUserSetWord([...initialUserSetWord]);
     setClickedIndices([]);
   }
+  function handleContinue() {
+    setAttempts((prev) => prev + 1);
+    setAlertboxVisible(false);
+  }
+  function handleRestart() {}
 
   return (
     <>
@@ -98,6 +107,13 @@ function HomePage() {
         <SettingsButton onClick={() => setSettingsVisible((prev) => !prev)} />
         <Settings settingsVisible={settingsVisible} />
         <HUD />
+        <AlertBox
+          word={word}
+          userSetWord={userSetWord}
+          alertboxVisible={alertboxVisible}
+          handleContinue={handleContinue}
+          handleRestart={handleRestart}
+        />
       </MainLayout>
     </>
   );
