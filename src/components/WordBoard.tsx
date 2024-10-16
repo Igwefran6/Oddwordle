@@ -1,13 +1,37 @@
-import { Key, useState } from "react";
+import { Key, SetStateAction, useState, Dispatch } from "react";
+import { isArrayFilled } from "../utils/isArrayFilled";
 
-// Function to shuffle an array
+interface WordBoardProps {
+  array: string[];
+  wordCount: number;
+  userSetWord: string[];
+  setUserSetWord: Dispatch<SetStateAction<string[]>>;
+}
 
-function WordBoard({ array }: { array: string[] }) {
+function WordBoard({
+  array,
+  wordCount,
+  userSetWord,
+  setUserSetWord,
+}: WordBoardProps) {
   const [clickedIndices, setClickedIndices] = useState<number[]>([]);
 
-  // Define the type of element as a string
   const handleClick = (element: string, index: number) => {
+    if (isArrayFilled(userSetWord)) {
+      return;
+    }
     setClickedIndices((prev) => [...prev, index]); // Add the index of the clicked button to the array
+
+    setUserSetWord((prev) => {
+      const nextEmptyIndex = prev.findIndex((el) => el === ""); // Find the next empty slot in userSetWord
+      if (nextEmptyIndex !== -1) {
+        const newArray = [...prev]; // Create a copy of the current state
+        newArray[nextEmptyIndex] = element; // Set the clicked element in the first empty slot
+        return newArray; // Return the updated array
+      }
+      return prev; // If no empty slots, return the current state unchanged
+    });
+
     console.log(element);
   };
 

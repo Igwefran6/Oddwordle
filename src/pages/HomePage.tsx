@@ -12,9 +12,19 @@ function HomePage() {
   const [word, setWord] = useState("");
   const [array, setArray] = useState<string[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
-  const [choosenWord, setChoosenWord] = useState<string[]>([]);
-  const [wordCount, setWordCount] = useState(6);
-  const [userWord, setUserWord] = useState<string[]>([]);
+  const [wordCount, setWordCount] = useState(4);
+  const [userSetWord, setUserSetWord] = useState<string[]>([]);
+  const [hintCount, setHintCount] = useState(2);
+
+  // Helper function to get random unique indices
+  const getRandomIndices = (count: number, max: number) => {
+    const indices = new Set<number>();
+    while (indices.size < count) {
+      const randomIndex = Math.floor(Math.random() * max);
+      indices.add(randomIndex);
+    }
+    return Array.from(indices);
+  };
 
   useEffect(() => {
     const url = `http://localhost:3000/api/words/length/${wordCount}`;
@@ -27,45 +37,46 @@ function HomePage() {
         setWord(word.word);
       });
     }
-
+    setUserSetWord(Array(wordCount).fill("")); // Initialize with empty strings
     getWord();
-  }, []);
+  }, [wordCount]);
 
   useEffect(() => {
-    if (word) {
-      console.log("if", word, word === "");
-    } else {
-      return console.log("else", word, word === "");
+    if (!word) {
+      return;
     }
+
     const newWord = word;
     // Scramble the new word and update the arrays once the word is set
     const scrambledArray = shuffleAndScramble({ word: newWord });
     setArray(scrambledArray);
-    setChoosenWord(newWord.split(""));
-  }, [word]);
 
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  //     event.preventDefault();
-  //     event.returnValue = ""; // A message prompt will be displayed in most browsers
-  //   };
+    // Randomly add hintCount characters to userSetWord array
+    const newUserSetWord = Array(wordCount).fill("");
+    const randomIndices = getRandomIndices(hintCount, wordCount);
 
-  //   // Add the event listener
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
+    randomIndices.forEach((index) => {
+      newUserSetWord[index] = newWord[index];
+    });
 
-  //   // Cleanup the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
+    setUserSetWord(newUserSetWord);
+  }, [word, hintCount, wordCount]);
 
   return (
     <>
       <MainLayout>
         <div className="flex flex-col h-full flex-1 justify-center items-center">
-          <AnswerBox array={choosenWord} />
-          <WordBoard array={array} />
-          <Button onClick={() => {}} label="Check" />
+          <AnswerBox array={userSetWord} />
+          <WordBoard
+            array={array}
+            wordCount={wordCount}
+            userSetWord={userSetWord}
+            setUserSetWord={setUserSetWord}
+          />
+          <div className="flex gap-4">
+            <Button onClick={() => {}} label="Check" />
+            <Button onClick={() => {}} label="Delete" />
+          </div>
         </div>
         <SettingsButton onClick={() => setSettingsVisible((prev) => !prev)} />
         <Settings settingsVisible={settingsVisible} />
