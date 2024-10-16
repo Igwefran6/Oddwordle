@@ -47,7 +47,10 @@ function AlertBox({
         </div>{" "}
         <hr className="w-36 opacity-50" />
         <div className="">
-          Reward: <span className="font-bold">+10</span>
+          Reward: <span className="font-bold">+10 points</span>
+        </div>
+        <div className="">
+          Reward: <span className="font-bold">+2c</span>
         </div>
       </div>
 

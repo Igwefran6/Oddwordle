@@ -84,6 +84,7 @@ function HomePage() {
   function handleContinue() {
     setAttempts((prev) => prev + 1);
     setAlertboxVisible(false);
+    setClickedIndices([]);
   }
   function handleRestart() {}
 
