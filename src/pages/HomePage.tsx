@@ -9,17 +9,18 @@ import Settings from "../components/Settings";
 import shuffleAndScramble from "../utils/shuffleAndScramble";
 import AlertBox from "../components/AlertBox";
 import { isArrayFilled } from "../utils/isArrayFilled";
+import SecureLocalStorage from "../utils/SecureLocalStorage";
 
 function HomePage() {
   const [word, setWord] = useState("");
   const [array, setArray] = useState<string[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [alertboxVisible, setAlertboxVisible] = useState(false);
-  const [wordCount, setWordCount] = useState(4);
+  const [difficulty, setDifficulty] = useState(6);
   const [attempts, setAttempts] = useState(0);
   const [userSetWord, setUserSetWord] = useState<string[]>([]);
   const [initialUserSetWord, setInitialUserSetWord] = useState<string[]>([]); // To track the initial hints
-  const [hintCount, setHintCount] = useState(2);
+  const [hintCount, setHintCount] = useState(3);
   const [clickedIndices, setClickedIndices] = useState<number[]>([]);
 
   // Helper function to get random unique indices
@@ -33,19 +34,19 @@ function HomePage() {
   };
 
   useEffect(() => {
-    const url = `http://localhost:3000/api/words/length/${wordCount}`;
+    const url = `http://localhost:3000/api/words/length/${difficulty}`;
     async function getWord() {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Error:");
+        throw new Error("Error: 404 cannot get");
       }
       response.json().then((word) => {
         setWord(word.word);
       });
     }
-    setUserSetWord(Array(wordCount).fill("")); // Initialize with empty strings
+    setUserSetWord(Array(difficulty).fill("")); // Initialize with empty strings
     getWord();
-  }, [wordCount, attempts]);
+  }, [difficulty, attempts]);
 
   useEffect(() => {
     if (!word) {
@@ -58,8 +59,8 @@ function HomePage() {
     setArray(scrambledArray);
 
     // Randomly add hintCount characters to userSetWord array
-    const newUserSetWord = Array(wordCount).fill("");
-    const randomIndices = getRandomIndices(hintCount, wordCount);
+    const newUserSetWord = Array(difficulty).fill("");
+    const randomIndices = getRandomIndices(hintCount, difficulty);
 
     randomIndices.forEach((index) => {
       newUserSetWord[index] = newWord[index];
@@ -67,7 +68,7 @@ function HomePage() {
 
     setUserSetWord(newUserSetWord);
     setInitialUserSetWord(newUserSetWord); // Track the initial state of hints
-  }, [word, hintCount, wordCount, attempts]);
+  }, [word, hintCount, difficulty, attempts]);
 
   function handleCheck() {
     if (isArrayFilled(userSetWord)) {

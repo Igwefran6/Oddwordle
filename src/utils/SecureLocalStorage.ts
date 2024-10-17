@@ -13,7 +13,7 @@ const decryptData = (ciphertext: string, key: string): any => {
 // Function to manage secure local storage
 const SecureLocalStorage = {
   // Secret key for encryption/decryption (keep this safe!)
-  secretKey: "your-secure-key", // Change this to a more secure key in production!
+  secretKey: "my-secure-key", // Change this to a more secure key in production!
 
   // Store data securely in local storage
   saveData: function (key: string, data: any): void {

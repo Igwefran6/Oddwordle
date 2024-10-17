@@ -8,7 +8,6 @@ function Settings({ settingsVisible }: { settingsVisible: boolean }) {
         (settingsVisible ? "translate-y-0" : "translate-y-[100svh]")
       }
     >
-      <div>LETTER COUNT</div>
       <div>DIFFICULTY</div>
       <div>SOUND</div>
       <div>RESET GAME</div>
