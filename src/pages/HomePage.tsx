@@ -9,19 +9,16 @@ import Settings from "../components/Settings";
 import shuffleAndScramble from "../utils/shuffleAndScramble";
 import AlertBox from "../components/AlertBox";
 import { isArrayFilled } from "../utils/isArrayFilled";
-import SecureLocalStorage from "../utils/SecureLocalStorage";
+import useAppContext from "../hooks/useAppContext";
 
 function HomePage() {
-  const [word, setWord] = useState("");
-  const [array, setArray] = useState<string[]>([]);
+  const { state, dispatch } = useAppContext();
+  const { word, difficulty, attempts, userSetWord, initialUserSetWord } = state;
+
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [alertboxVisible, setAlertboxVisible] = useState(false);
-  const [difficulty, setDifficulty] = useState(6);
-  const [attempts, setAttempts] = useState(0);
-  const [userSetWord, setUserSetWord] = useState<string[]>([]);
-  const [initialUserSetWord, setInitialUserSetWord] = useState<string[]>([]); // To track the initial hints
-  const [hintCount, setHintCount] = useState(3);
-  const [clickedIndices, setClickedIndices] = useState<number[]>([]);
+
+  const hintCount = 1;
 
   // Helper function to get random unique indices
   const getRandomIndices = (count: number, max: number) => {
@@ -32,31 +29,46 @@ function HomePage() {
     }
     return Array.from(indices);
   };
+  async function GetNewWord() {
+    console.log(word);
+    const url = `http://localhost:3000/api/words/length/${difficulty}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Error: 404 cannot get");
+    }
+    const newWordData = await response.json();
+    dispatch({ type: "SET_WORD", payload: newWordData.word });
+
+    // Scramble the new word after it has been set
+    const scrambledArray = shuffleAndScramble({ word: newWordData.word });
+    dispatch({
+      type: "UPDATE_ARRAY",
+      payload: scrambledArray,
+    });
+
+    dispatch({
+      type: "SET_USER_SET_WORD",
+      payload: Array(difficulty).fill(""),
+    });
+  }
 
   useEffect(() => {
-    const url = `http://localhost:3000/api/words/length/${difficulty}`;
-    async function getWord() {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Error: 404 cannot get");
-      }
-      response.json().then((word) => {
-        setWord(word.word);
-      });
+    dispatch({
+      type: "SET_USER_SET_WORD",
+      payload: Array(difficulty).fill(""),
+    });
+
+    if (word) {
+      return;
     }
-    setUserSetWord(Array(difficulty).fill("")); // Initialize with empty strings
-    getWord();
-  }, [difficulty, attempts]);
+    GetNewWord();
+  }, [attempts, difficulty]);
 
   useEffect(() => {
     if (!word) {
       return;
     }
-
     const newWord = word;
-    // Scramble the new word and update the arrays once the word is set
-    const scrambledArray = shuffleAndScramble({ word: newWord });
-    setArray(scrambledArray);
 
     // Randomly add hintCount characters to userSetWord array
     const newUserSetWord = Array(difficulty).fill("");
@@ -65,9 +77,15 @@ function HomePage() {
     randomIndices.forEach((index) => {
       newUserSetWord[index] = newWord[index];
     });
-
-    setUserSetWord(newUserSetWord);
-    setInitialUserSetWord(newUserSetWord); // Track the initial state of hints
+    dispatch({
+      type: "SET_USER_SET_WORD",
+      payload: newUserSetWord,
+    });
+    dispatch({
+      type: "SET_INITIAL_USER_SET_WORD",
+      payload: newUserSetWord,
+    });
+    // Track the initial state of hints
   }, [word, hintCount, difficulty, attempts]);
 
   function handleCheck() {
@@ -78,29 +96,35 @@ function HomePage() {
     }
   }
   function handleClear() {
+    console.log(state);
     // Reset userSetWord to the initial hints, keeping the initial hints intact
-    setUserSetWord([...initialUserSetWord]);
-    setClickedIndices([]);
+    dispatch({
+      type: "SET_USER_SET_WORD",
+      payload: [...initialUserSetWord],
+    });
+    dispatch({
+      type: "CLICKED_INDICES",
+      payload: [],
+    });
   }
   function handleContinue() {
-    setAttempts((prev) => prev + 1);
+    dispatch({ type: "SET_ATTEMPTS", payload: attempts + 1 });
     setAlertboxVisible(false);
-    setClickedIndices([]);
+    dispatch({
+      type: "CLICKED_INDICES",
+      payload: [],
+    });
+    GetNewWord();
   }
   function handleRestart() {}
+  useEffect(() => {}, []);
 
   return (
     <>
       <MainLayout>
         <div className="flex flex-col h-full flex-1 justify-center items-center">
           <AnswerBox array={userSetWord} />
-          <WordBoard
-            array={array}
-            userSetWord={userSetWord}
-            setUserSetWord={setUserSetWord}
-            clickedIndices={clickedIndices}
-            setClickedIndices={setClickedIndices}
-          />
+          <WordBoard />
           <div className="flex gap-4">
             <Button onClick={handleCheck} label="Check" />
             <Button onClick={handleClear} label="Clear" />

@@ -1,38 +1,31 @@
-import { Key, SetStateAction, Dispatch } from "react";
+import { Key } from "react";
 import { isArrayFilled } from "../utils/isArrayFilled";
+import useAppContext from "../hooks/useAppContext";
 
-interface WordBoardProps {
-  array: string[];
-  userSetWord: string[];
-  clickedIndices: number[];
-  setClickedIndices: Dispatch<SetStateAction<number[]>>;
-  setUserSetWord: Dispatch<SetStateAction<string[]>>;
-}
-
-function WordBoard({
-  array,
-  userSetWord,
-  clickedIndices,
-  setClickedIndices,
-  setUserSetWord,
-}: WordBoardProps) {
+function WordBoard() {
+  const { state, dispatch } = useAppContext();
+  const { array, clickedIndices, userSetWord } = state;
   const handleClick = (element: string, index: number) => {
     if (isArrayFilled(userSetWord)) {
       return;
     }
-    setClickedIndices((prev) => [...prev, index]); // Add the index of the clicked button to the array
 
-    setUserSetWord((prev) => {
-      const nextEmptyIndex = prev.findIndex((el) => el === ""); // Find the next empty slot in userSetWord
-      if (nextEmptyIndex !== -1) {
-        const newArray = [...prev]; // Create a copy of the current state
-        newArray[nextEmptyIndex] = element; // Set the clicked element in the first empty slot
-        return newArray; // Return the updated array
-      }
-      return prev; // If no empty slots, return the current state unchanged
+    dispatch({
+      type: "CLICKED_INDICES",
+      payload: clickedIndices.concat(index),
     });
 
-    console.log(element);
+    const nextEmptyIndex = userSetWord.findIndex((el) => el === "");
+    if (nextEmptyIndex !== -1) {
+      const updatedArray = [...userSetWord]; // Create a copy of the current state
+      updatedArray[nextEmptyIndex] = element; // Set the clicked element in the first empty slot
+
+      // Dispatch action to update userSetWord
+      dispatch({
+        type: "SET_USER_SET_WORD",
+        payload: updatedArray,
+      });
+    }
   };
 
   return (

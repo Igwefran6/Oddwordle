@@ -1,9 +1,13 @@
 import AppRouterProvider from "./router/router";
+import { AppContext } from "./store/AppContext";
 
 function App() {
   return (
     <>
-      <AppRouterProvider />
+      <AppContext>
+        {" "}
+        <AppRouterProvider />
+      </AppContext>
     </>
   );
 }
